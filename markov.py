@@ -16,7 +16,6 @@ def open_and_read_file(file_path):
 
     text = open(file_path).read()
 
-
     return text
 
 
@@ -62,7 +61,12 @@ def make_text(chains):
     words = []
 
     start = choice(chains.keys())
-    words.extend([start[0], start[1]])
+    while True:
+        if start[0].istitle():
+            words.extend([start[0], start[1]])
+            break
+        else:
+            start = choice(chains.keys())
 
     while True:
         values = chains[tuple([words[-2], words[-1]])]

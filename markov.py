@@ -5,7 +5,7 @@ from random import choice
 import sys
 
 
-def open_and_read_file(file_path):
+def open_and_read_file(file_path1, file_path2):
     """Takes file path as string; returns text as string.
 
     Takes a string that is a file path, opens the file, and turns
@@ -14,8 +14,11 @@ def open_and_read_file(file_path):
 
     # your code goes here
 
-    text = open(file_path).read()
+    text1 = open(file_path1).read()
+    text2 = open(file_path2).read()
 
+    text = text1 + text2
+    
     return text
 
 
@@ -91,10 +94,11 @@ def make_text(chains):
     return " ".join(words)
 
 
-input_path = sys.argv[1]
+input_path1 = sys.argv[1]
+input_path2 = sys.argv[2]
 
 # Open the file and turn it into one long string
-input_text = open_and_read_file(input_path)
+input_text = open_and_read_file(input_path1, input_path2)
 
 # Get a Markov chain
 n = int(raw_input("How long would like your ngram? "))

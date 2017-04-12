@@ -19,7 +19,7 @@ def open_and_read_file(file_path):
     return text
 
 
-def make_chains(text_string):
+def make_chains(text_string, n):
     """Takes input text as string; returns dictionary of markov chains.
 
     A chain will be a key that consists of a tuple of (word1, word2)
@@ -45,12 +45,17 @@ def make_chains(text_string):
 
      # your code goes here
     text = text_string.split()
-    for i in range(len(text) - 2):
-        if tuple([text[i], text[i+1]]) in chains:
-            chains[tuple([text[i], text[i+1]])].append(text[i+2])
+    for i in range(len(text) - n):
+        seq = []
+        indexes = i
+        while len(seq) < n:
+            seq.append(text[indexes])
+            indexes += 1
+        if tuple(seq) in chains:
+            chains[tuple(seq)].append(text[i+n])
         else:
-            chains[tuple([text[i], text[i+1]])] = [text[i+2]]
-    chains[tuple([text[-2], text[-1]])] = None
+            chains[tuple(seq)] = [text[i+n]]
+    chains[tuple(text[-n:])] = None
 
     return chains
 
@@ -63,13 +68,13 @@ def make_text(chains):
     start = choice(chains.keys())
     while True:
         if start[0].istitle():
-            words.extend([start[0], start[1]])
+            words.extend(start[:n])
             break
         else:
             start = choice(chains.keys())
 
     while True:
-        values = chains[tuple([words[-2], words[-1]])]
+        values = chains[tuple(words[-n:])]
         if values is None:
             break
         else:
@@ -86,7 +91,8 @@ input_path = sys.argv[1]
 input_text = open_and_read_file(input_path)
 
 # Get a Markov chain
-chains = make_chains(input_text)
+n = int(raw_input("How long would like your ngram? "))
+chains = make_chains(input_text, n)
 
 # Produce random text
 random_text = make_text(chains)

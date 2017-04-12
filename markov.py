@@ -51,10 +51,13 @@ def make_chains(text_string, n):
         while len(seq) < n:
             seq.append(text[indexes])
             indexes += 1
-        if tuple(seq) in chains:
-            chains[tuple(seq)].append(text[i+n])
-        else:
-            chains[tuple(seq)] = [text[i+n]]
+        tupled = tuple(seq)
+        chains.setdefault(tupled, [])
+        chains[tupled].append(text[i+n])
+        # if tuple(seq) in chains:
+        #     chains[tuple(seq)].append(text[i+n])
+        # else:
+        #     chains[tuple(seq)] = [text[i+n]]
     chains[tuple(text[-n:])] = None
 
     return chains
@@ -75,10 +78,13 @@ def make_text(chains):
 
     while True:
         values = chains[tuple(words[-n:])]
+        if words[-1][-1] in (".", "!", "?"):
+            break
         if values is None:
             break
         else:
             words.append(choice(values))
+
 
     # your code goes here
 

@@ -3,9 +3,10 @@
 
 from random import choice
 import sys
+import twitter
+import os
 
-
-def open_and_read_file(file_path1, file_path2):
+def open_and_read_file(args):
     """Takes file path as string; returns text as string.
 
     Takes a string that is a file path, opens the file, and turns
@@ -13,11 +14,10 @@ def open_and_read_file(file_path1, file_path2):
     """
 
     # your code goes here
-
-    text1 = open(file_path1).read()
-    text2 = open(file_path2).read()
-
-    text = text1 + text2
+    text = ""
+    for files in args:
+        text1 = open(files).read()
+        text += text1 
     
     return text
 
@@ -70,41 +70,87 @@ def make_text(chains):
     """Returns text from chains."""
 
     words = []
-
+    counter = 0
     start = choice(chains.keys())
     while True:
         if start[0].istitle():
-            words.extend(start[:n])
+            words.extend(start[:])
+            len_list = [len(item) + 1 for item in start]
+            counter += sum(len_list)
             break
         else:
             start = choice(chains.keys())
-
-    while True:
+    stop = None
+    while counter <= 140:
         values = chains[tuple(words[-n:])]
         if words[-1][-1] in (".", "!", "?"):
-            break
+            stop = len(words)
         if values is None:
             break
         else:
-            words.append(choice(values))
-
+            chosen_value = choice(values)
+            if counter + len(chosen_value) < 140:
+                words.append(chosen_value)
+                counter += len(chosen_value) + 1
+            else:
+                if stop:
+                    words = words[:stop]
+                break
 
     # your code goes here
-
     return " ".join(words)
 
 
-input_path1 = sys.argv[1]
-input_path2 = sys.argv[2]
+def tweet(chains):
+    api = twitter.Api(
+        consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
+        consumer_secret=os.environ['TWITTER_CONSUMER_SECRET'],
+        access_token_key=os.environ['TWITTER_ACCESS_TOKEN_KEY'],
+        access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET'])
 
-# Open the file and turn it into one long string
-input_text = open_and_read_file(input_path1, input_path2)
+    # This will print info about credentials to make sure
+    # they're correct
+    # print api.VerifyCredentials()
+    status = api.PostUpdate(chains)
+    print status.text
+    # Send a tweet
+    while True:
+        user_choice = raw_input("Enter t to tweet again, q to quit: ")
+        if user_choice == "q":
+            sys.exit()
+        elif user_choice == "t":
+            main()
+            status = api.PostUpdate(tweetchain)
+            print status.text
+        else:
+            print "Not a valid entry!"
 
-# Get a Markov chain
+
+def main():
+    input_paths = sys.argv[1:]
+
+    # Open the file and turn it into one long string
+    input_text = open_and_read_file(input_paths)
+
+    # Get a Markov chain
+    
+    chains = make_chains(input_text, n)
+
+    # Produce random text
+    tweetchain = make_text(chains)
+
+    tweet(tweetchain)
+
 n = int(raw_input("How long would like your ngram? "))
-chains = make_chains(input_text, n)
+main()
 
-# Produce random text
-random_text = make_text(chains)
+# def print_text(random_text):
+#     """Makes word string less than 140 characters and ends with punctuation"""
+#     while True:
+#         if c <= 140 #and (random_text[-1] in (".", "!", "?", ",")):
+#             return random_text
+#             break
+#         else:
+#             random_text = make_text(chains)
 
-print random_text
+
